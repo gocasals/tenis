@@ -333,21 +333,44 @@ function renderHeatmap(){
       const points = filtered.map(d => {
         const key = d.notation.toUpperCase();
         const pos = POSITIONS[key];
+        const duracion = d.duracion;
         if(!pos) return null;
         let value;
         if(dato==="duracion") value = d.duracion;
         else if(dato==="promedio") value = 60 - Math.abs(d.promedio); // normalizar dB
         else if(dato==="pico") value = 60 - Math.abs(d.pico);
-        return { x: pos[0], y: pos[1], value: value };
+        return { x: pos[0], y: pos[1], value: value, duracion: duracion };
       }).filter(Boolean);
 
       // Calcular min/max
       const values = points.map(p => p.value);
       const min = values.length ? Math.min(...values) : 0;
       const max = values.length ? Math.max(...values) : 1;
-
+      
       // Actualizar heatmap
       heatmapInstance.setData({ min, max, data: points });
+
+      // Eliminar etiquetas anteriores
+      document.querySelectorAll('.label-point').forEach(el => el.remove());
+
+      // Agregar etiquetas nuevas
+      const court = document.getElementById('court');
+      points.forEach(p => {
+        const label = document.createElement('div');
+        label.className = 'label-point';
+        label.style.position = 'absolute';
+        label.style.left = (p.x - 15) + 'px'; // ajustar para centrar
+        label.style.top = (p.y - 20) + 'px';
+        label.style.color = '#000';
+        label.style.background = 'rgba(255,255,255,0.3)';
+        label.style.padding = '2px 4px';
+        label.style.borderRadius = '4px';
+        label.style.fontSize = '10px';
+        label.style.pointerEvents = 'none';
+        label.textContent = p.duracion+" seg"; // muestra el valor
+        court.appendChild(label);
+      }); 
+
     }
 
     // Render inicial
@@ -361,6 +384,4 @@ function renderHeatmap(){
     //});
   </script>
 </body>
-
 </html>
-
